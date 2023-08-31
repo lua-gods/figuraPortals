@@ -1,0 +1,6 @@
+local worldRenderer = require("renderer")
+
+local part = models:newPart("WORLD", "World")
+local pos = vec(500, 73, 386)
+part:setPos(pos * 16 + vec(0, 256, 0))
+worldRenderer(pos, 1, part)
