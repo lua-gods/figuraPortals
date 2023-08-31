@@ -83,10 +83,20 @@ local function updateLines(portal, color)
    local b = portal.pos - portal.size.x__ * rotMat
    local c = portal.pos - portal.size.xy_ * rotMat
    local d = portal.pos - portal.size._y_ * rotMat
-   table.insert(linesList, lineLibrary:newLine():from(a):to(b):depth(-0.05):width(0.1):color(color))
-   table.insert(linesList, lineLibrary:newLine():from(b):to(c):depth(-0.05):width(0.1):color(color))
-   table.insert(linesList, lineLibrary:newLine():from(c):to(d):depth(-0.05):width(0.1):color(color))
-   table.insert(linesList, lineLibrary:newLine():from(d):to(a):depth(-0.05):width(0.1):color(color))
+   table.insert(linesList, lineLibrary:newLine():from(a):to(b):depth(-0.05):width(0.05):color(color))
+   table.insert(linesList, lineLibrary:newLine():from(b):to(c):depth(-0.05):width(0.05):color(color))
+   table.insert(linesList, lineLibrary:newLine():from(c):to(d):depth(-0.05):width(0.05):color(color))
+   table.insert(linesList, lineLibrary:newLine():from(d):to(a):depth(-0.05):width(0.05):color(color))
+
+   table.insert(linesList, lineLibrary:newLine():from(a):to(b):depth(-0.025):width(0.1):color(color * 0.5))
+   table.insert(linesList, lineLibrary:newLine():from(b):to(c):depth(-0.025):width(0.1):color(color * 0.5))
+   table.insert(linesList, lineLibrary:newLine():from(c):to(d):depth(-0.025):width(0.1):color(color * 0.5))
+   table.insert(linesList, lineLibrary:newLine():from(d):to(a):depth(-0.025):width(0.1):color(color * 0.5))
+
+   table.insert(linesList, lineLibrary:newLine():from(a):to(b):depth(-0.9):width(0.02):color(color))
+   table.insert(linesList, lineLibrary:newLine():from(b):to(c):depth(-0.9):width(0.02):color(color))
+   table.insert(linesList, lineLibrary:newLine():from(c):to(d):depth(-0.9):width(0.02):color(color))
+   table.insert(linesList, lineLibrary:newLine():from(d):to(a):depth(-0.9):width(0.02):color(color))
 end
 
 function pings.portals(enabled1, enabled2, pos1, side1, pos2, side2)

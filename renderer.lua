@@ -13,6 +13,15 @@ local sideMap = {
    EAST = vec(1, 0, 0),
    WEST = vec(-1, 0, 0),
 }
+
+local sideMapShade = {
+   SOUTH = 0.75,
+   NORTH = 0.75,
+   UP = 1,
+   DOWN = 0.25,
+   EAST = 0.5,
+   WEST = 0.5,
+}
 -- overrides
 local overrideList = require("override", function() return {ids = {}, tags = {}} end)
 local emptyOverride = {}
@@ -76,23 +85,27 @@ local function newSprite(data, list, side, pos, offset, size, uvStart, uvEnd, ro
    offset = offset * 16
    for i = 1, #spriteTextures do
       id = id + 1
+      local shade = 1
+      if sideMapShade[string.upper(side)] then
+         shade = sideMapShade[string.upper(side)]
+      end
       local sprite = modelpart:newSprite(id)
       :texture(spriteTextures[i]..".png", 16, 16)
       :pos(pos * 16 + offset + normal * (i - 1) * 0.25)
       :scale(size.x, size.y, 1)
       :setRenderType("translucent_cull")
       :rot(rot)
-      :color(globalColor * getOverrideColor(data.override, usedSide, i))
+      :color(globalColor * getOverrideColor(data.override, usedSide, i) * shade)
       -- set uv
       for _, v in pairs(sprite:getVertices()) do
-         v:setUV(math.lerp(uvStart, uvEnd, v:getUV()))
+         v:setUV(math.lerp(uvStart, uvEnd, v:getUV())):setNormal(normal)
       end
       -- add to modelparts
       table.insert(modelData, sprite)
    end
 
    if data.block.id == "minecraft:water" then
-      print("YEP")
+      --print("YEP")
    end
 end
 
@@ -125,17 +138,16 @@ local function renderBlock(list, data)
 end
 
 local function render(pos, dist, renderSprites)
-   pos = pos:copy():floor()
    modelpart = renderSprites
    modelData = {}
    id = 0
 
    local list = {}
-   for x = -dist - 1, dist + 1 do
+   for x = -dist.x - 1, dist.x + 1 do
       list[x] = {}
-      for y = -dist - 1, dist + 1 do
+      for y = -dist.y - 1, dist.y + 1 do
          list[x][y] = {}
-         for z = -dist - 1, dist + 1 do
+         for z = -dist.x - 1, dist.x + 1 do
             local offset = vec(x, y, z)
             local p = pos + offset
             local block = world.getBlockState(p)
@@ -165,9 +177,9 @@ local function render(pos, dist, renderSprites)
       end
    end
 
-   for x = -dist, dist do
-      for y = -dist, dist do
-         for z = -dist, dist do
+   for x = -dist.x, dist.x -1 do
+      for y = -dist.y, dist.y-1 do
+         for z = -dist.x, dist.x-1 do
             renderBlock(list, list[x][y][z])
          end
       end

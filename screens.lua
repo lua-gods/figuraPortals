@@ -2,7 +2,7 @@
 local worldRenderer = require("renderer")
 
 -- config
-local blockDist = 3
+local blockDist = vectors.vec2(3,3)
 local renderOnlyWhenCameraMoving = true
 
 -- variables
@@ -10,9 +10,8 @@ local worldModelPart = models:newPart("screenWorld", "World")
 local lib = {}
 local screens = {}
 local backgroundTexture = textures:newTexture("backgroundScreenTexture", 1, 1):setPixel(0, 0, 1, 1, 1)
-blockDist = math.min(blockDist, 10)
 
--- functions
+-- functions`
 local function rebuild(screen)
    -- remove previous sprites
    for _, sprite in pairs(screen.sprites) do
@@ -28,7 +27,7 @@ local function rebuild(screen)
    local reversedTargetRot = matrices.rotation3(screen.targetRot):transpose()
 
    -- sprites offset
-   local spritesOffset = vec(math.floor(-screen.size.x * 0.5), math.floor(-screen.size.y * 0.5), blockDist)
+   local spritesOffset = vec(math.floor(-screen.size.x * 0.5), math.floor(-screen.size.y * 0.5), math.max(blockDist.x,blockDist.y))
 
    -- mirror
    if screen.mirror then
@@ -157,19 +156,14 @@ local function needRender(offset, screen)
    local p3 = vectors.worldToScreenSpace(screen.pos - screen.size._y_ * rotMat)
    local p4 = vectors.worldToScreenSpace(screen.pos - screen.size.xy_ * rotMat)
    -- stop rendering if all points are behind camera
-   if p1.z < 1 and p2.z < 1 and p3.z < 1 and p4.z < 1 then
+   if p1.z < 1 and p2.z < 1 and p3.z < 1 and p4.z < 1 and p1.z > 0 and p2.z > 0 and p3.z > 0 and p4.z > 0 then
       return false
    end
-   -- fix points xy flipping when behind camera
-   if p1.z < 1 then p1 = -p1 end
-   if p2.z < 1 then p2 = -p2 end
-   if p3.z < 1 then p3 = -p3 end
-   if p4.z < 1 then p4 = -p4 end
    -- calculate smallest and biggest position
    local min = vec(math.min(p1.x, p2.x, p3.x, p4.x), math.min(p1.y, p2.y, p3.y, p4.y))
    local max = vec(math.max(p1.x, p2.x, p3.x, p4.x), math.max(p1.y, p2.y, p3.y, p4.y))
    -- stop if rectange containing all points is outside of camera
-   if min > vec(1, 1) or max < vec(-1, -1) then
+   if min.x > 1 and min.y > 1 and max.x < 1 and max.y < 1 then
       return false
    end
    -- allow rendering
@@ -215,14 +209,18 @@ local function renderScreen(camera, screen)
             visible = visible or pos.z >= 0
             local depth = math.max(pos.z, 0)
             local mat = depthMatrixCache[depth]
-            local renderOffset = pos.z * 0.0025 - depthoffset
             if not mat then
-               mat = depthMatrix(offset, depth - renderOffset, size)
+               mat = depthMatrix(offset, depth, size)
                depthMatrixCache[depth] = mat
             end
-            local newPos = pos.xy:augmented(1) * mat
-            newPos = clampFunc(newPos.xy, size)
-            vertex:setPos(newPos.x, newPos.y, renderOffset)
+            if mat.c3.x+8 > 0 and size.x * 16 > mat.c3.x - 8 and mat.c3.y+8 > 0 and size.y * 16 > mat.c3.y - 8 then
+               local newPos = pos.xy:augmented(1) * mat
+               local renderOffset = pos.z * 0.0025 - depthoffset
+               newPos = clampFunc(newPos.xy, size)
+               vertex:setPos(newPos.x, newPos.y, renderOffset)
+            else
+               vertex:setPos(0, 0, 99999999)
+            end
          end
          spriteGroup.sprite:setVisible(visible)
       end
