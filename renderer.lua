@@ -22,6 +22,15 @@ local sideMapShade = {
    EAST = 0.5,
    WEST = 0.5,
 }
+
+local adjacent = {
+   vectors.vec3(-1,0,0),
+   vectors.vec3(1,0,0),
+   vectors.vec3(0,-1,0),
+   vectors.vec3(0,1,0),
+   vectors.vec3(0,0,-1),
+   vectors.vec3(0,0,1),
+}
 -- overrides
 local overrideList = require("override", function() return {ids = {}, tags = {}} end)
 local emptyOverride = {}
@@ -141,7 +150,6 @@ local function render(pos, dist, renderSprites)
    modelpart = renderSprites
    modelData = {}
    id = 0
-
    local list = {}
    for x = -dist.x - 1, dist.x + 1 do
       list[x] = {}
@@ -164,15 +172,26 @@ local function render(pos, dist, renderSprites)
                   end
                end
             end
-            list[x][y][z] = {
-               pos = p,
-               offset = offset,
-               block = block,
-               textures = block:getTextures(),
-               shape = block:getOutlineShape(),
-               cull = cull,
-               override = override or emptyOverride
-            }
+            local covered = false
+            for key, value in pairs(adjacent) do
+               if not world.getBlockState(p+value):isOpaque() then
+                  covered = true
+                  break
+               end
+            end
+            if not covered then
+               list[x][y][z] = {}
+            else
+               list[x][y][z] = {
+                  pos = p,
+                  offset = offset,
+                  block = block,
+                  textures = block:getTextures(),
+                  shape = block:getOutlineShape(),
+                  cull = cull,
+                  override = override or emptyOverride
+               }
+            end
          end
       end
    end
@@ -180,9 +199,8 @@ local function render(pos, dist, renderSprites)
    for x = -dist.x, dist.x -1 do
       for y = -dist.y, dist.y-1 do
          for z = -dist.x, dist.x-1 do
-            if not list[x][y][z].block:isAir() then
+            if list[x][y][z].block and not list[x][y][z].block:isAir() then
                renderBlock(list, list[x][y][z])
-               
             end
          end
       end

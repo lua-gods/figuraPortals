@@ -219,7 +219,8 @@ local function renderScreen(camera, screen)
                newPos = clampFunc(newPos.xy, size)
                vertex:setPos(newPos.x, newPos.y, renderOffset)
             else
-               vertex:setPos(0, 0, 99999999)
+               visible = false
+               break
             end
          end
          spriteGroup.sprite:setVisible(visible)

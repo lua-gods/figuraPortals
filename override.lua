@@ -7,7 +7,7 @@ local waterFrames = 32
 -- models
 local sqrt05 = math.sqrt(0.5)
 
-local grassModel = {
+local crossModel = {
    {
       pos = vec(0.5 + sqrt05 * 0.5, 1, 0.5 - sqrt05 * 0.5),
       rot = vec(0, 45, 0),
@@ -43,13 +43,13 @@ return {
          }
       },
 
-      ["minecraft:grass"] = {color = grass, mesh = grassModel},
-      ["minecraft:tall_grass"] = {color = grass, mesh = grassModel},
-      ["minecraft:fern"] = {color = grass, mesh = grassModel},
-      ["minecraft:large_fern"] = {color = grass, mesh = grassModel},
+      ["minecraft:grass"] = {color = grass, mesh = crossModel},
+      ["minecraft:tall_grass"] = {color = grass, mesh = crossModel},
+      ["minecraft:fern"] = {color = grass, mesh = crossModel},
+      ["minecraft:large_fern"] = {color = grass, mesh = crossModel},
       ["minecraft:vine"] = {color = foliage},
 
-      ["minecraft:sugar_cane"] = {color = foliage, mesh = grassModel},
+      ["minecraft:sugar_cane"] = {color = foliage, mesh = crossModel},
 
       ["minecraft:oak_leaves"] = {color = foliage, noCull = true},
       ["minecraft:spruce_leaves"] = {color = vec(0.38, 0.6, 0.38)},
@@ -85,7 +85,7 @@ return {
    },
    tags = {
       ["minecraft:flowers"] = {
-         mesh = grassModel
+         mesh = crossModel
       }
    }
 }
