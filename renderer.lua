@@ -180,7 +180,10 @@ local function render(pos, dist, renderSprites)
    for x = -dist.x, dist.x -1 do
       for y = -dist.y, dist.y-1 do
          for z = -dist.x, dist.x-1 do
-            renderBlock(list, list[x][y][z])
+            if not list[x][y][z].block:isAir() then
+               renderBlock(list, list[x][y][z])
+               
+            end
          end
       end
    end
