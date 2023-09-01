@@ -107,7 +107,7 @@ local function newSprite(data, list, side, pos, offset, size, uvStart, uvEnd, ro
       :color(globalColor * getOverrideColor(data.override, usedSide, i) * shade)
       -- set uv
       for _, v in pairs(sprite:getVertices()) do
-         v:setUV(math.lerp(uvStart, uvEnd, v:getUV())):setNormal(normal)
+         v:setUV(math.lerp(uvStart, uvEnd, v:getUV()))
       end
       -- add to modelparts
       table.insert(modelData, sprite)

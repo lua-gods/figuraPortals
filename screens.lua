@@ -2,8 +2,8 @@
 local worldRenderer = require("renderer")
 
 -- config
-local blockDist = vectors.vec2(5,3)
-local renderOnlyWhenCameraMoving = true
+local blockDist = vectors.vec2(3,3)
+-- local renderOnlyWhenCameraMoving = true
 
 -- variables
 local worldModelPart = models:newPart("screenWorld", "World")
@@ -11,50 +11,62 @@ local lib = {}
 local screens = {}
 local backgroundTexture = textures:newTexture("backgroundScreenTexture", 1, 1):setPixel(0, 0, 1, 1, 1)
 
--- functions`
-local function rebuild(screen)
-   -- remove previous sprites
-   for _, sprite in pairs(screen.sprites) do
+local screenApi = {}
+local screenApiMetatable = {__index = screenApi}
+
+-- functions
+function screenApi:clear()
+   for _, sprite in pairs(self.sprites) do
       sprite:remove()
    end
-   screen.vertices = {}
-   
+   self.vertices = {}
+end
+
+function screenApi:remove()
+   self:clear()
+   self.modelpart:removeTask("bg")
+   worldModelPart:removeChild(self.modelpart)
+   screens[self.id] = nil
+end
+
+function screenApi:rebuild()
+   self:clear()
    -- force screen to update
-   screen.needToUpdate = true
+   self.needToUpdate = true
 
    -- calculate some things
    local scaleFix = vec(1, 1, -1)
-   local reversedTargetRot = matrices.rotation3(screen.targetRot):transpose()
+   local reversedTargetRot = matrices.rotation3(self.targetRot):transpose()
 
    -- sprites offset
-   local spritesOffset = vec(math.floor(-screen.size.x * 0.5), math.floor(-screen.size.y * 0.5), math.max(blockDist.x,blockDist.y))
+   local spritesOffset = vec(math.floor(-self.size.x * 0.5), math.floor(-self.size.y * 0.5), math.max(blockDist.x,blockDist.y))
 
    -- mirror
-   if screen.mirror then
+   if self.mirror then
       spritesOffset.z = -spritesOffset.z
       scaleFix.z = 1
    end
 
    -- rotate sprite offset
-   spritesOffset = (spritesOffset * matrices.rotation3(screen.targetRot) + 0.5):floor()
+   spritesOffset = (spritesOffset * matrices.rotation3(self.targetRot) + 0.5):floor()
    
    -- generate sprites for blocks
-   screen.sprites = worldRenderer(screen.targetPos + spritesOffset, blockDist, screen.modelpart)
+   self.sprites = worldRenderer(self.targetPos + spritesOffset, blockDist, self.modelpart)
 
    -- fix sprite offset
    spritesOffset = spritesOffset * 16
    -- go through all sprites and add them to list
-   screen.vertices.world = {}
-   for _, sprite in pairs(screen.sprites) do
+   self.vertices.world = {}
+   for _, sprite in pairs(self.sprites) do
       local spritePos = sprite:getPos() + spritesOffset
       local spriteScale = sprite:getScale()
       local rotMatrix = matrices.rotation3(sprite:getRot())
       sprite:pos():rot():scale():setLight(15, 15)
       local spriteVertices = {sprite = sprite}
-      table.insert(screen.vertices.world, spriteVertices)
+      table.insert(self.vertices.world, spriteVertices)
       for _, vertex in pairs(sprite:getVertices()) do
          local vertexPos = vertex:getPos()
-         if screen.mirror then
+         if self.mirror then
             vertexPos.x = 16 - vertexPos.x
             local uv = vertex:getUV()
             uv.x = -uv.x
@@ -69,11 +81,13 @@ local function rebuild(screen)
 end
 
 function lib.newScreen(size, pos, rot, targetPos, targetRot, disabled, mirror)
-   local screenModelPartname = "screen"..(#screens + 1)
-   local modelpart = worldModelPart[screenModelPartname] or worldModelPart:newPart(screenModelPartname)
+   local id = (#screens + 1)
+   local screenModelPartname = "screen"..id
+   local modelpart = worldModelPart:newPart(screenModelPartname)
 
    local screen = {
       -- data
+      id = id,
       modelpart = modelpart,
       sprites = {},
       vertices = {},
@@ -85,7 +99,6 @@ function lib.newScreen(size, pos, rot, targetPos, targetRot, disabled, mirror)
       lastOffset = vec(0, 0, 0),
       needToUpdate = false,
       -- apis
-      rebuild = rebuild,
       clampFunc = nil,
       disabled = disabled or false,
       background = true,
@@ -93,16 +106,20 @@ function lib.newScreen(size, pos, rot, targetPos, targetRot, disabled, mirror)
       mirror = mirror or false
    }
 
+   setmetatable(screen, screenApiMetatable)
+
    screen.backgroundSprite = screen.modelpart:newSprite("bg")
-      :texture(backgroundTexture, 1, 1)
-      :scale(size.x * 16, size.y * 16, 1)
-      :light(15, 15)
+      :texture(backgroundTexture, 16, 16)
+      :scale(size.x, size.y, 1)
+      :light(15)
       :renderType("translucent_cull")
       :pos(0, 0, -0.05)
 
-   table.insert(screens, screen)
+   screens[id] = screen
 
-   screen:rebuild()
+   if not disabled then
+      screen:rebuild()
+   end
 
    return screen
 end

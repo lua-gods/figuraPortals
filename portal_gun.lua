@@ -34,16 +34,16 @@ local time = 0
 
 local sides = {
    north = {
-      rot = vec(0, 0, 0), pos = vec(1, 2, 1), targetRot = vec(0, 180, 0), targetOffset = vec(-1, 0, 0), teleportOffset = vec(-0.5, -2, -0.5), dir = 0
+      rot = vec(0, 0, 0), pos = vec(1, 2, 1), targetRot = vec(0, 180, 0), targetOffset = vec(-1, 0, 0), teleportOffset = vec(-0.5, -2, -0.5), dir = 0, updateRot = true
    },
    east = {
-      rot = vec(0, -90, 0), pos = vec(0, 2, 1), targetRot = vec(0, 90, 0), targetOffset = vec(0, 0, -1), teleportOffset = vec(0.5, -2, -0.5), dir = 1
+      rot = vec(0, -90, 0), pos = vec(0, 2, 1), targetRot = vec(0, 90, 0), targetOffset = vec(0, 0, -1), teleportOffset = vec(0.5, -2, -0.5), dir = 1, updateRot = true
    },
    west = {
-      rot = vec(0, 90, 0), pos = vec(1, 2, 0), targetRot = vec(0, -90, 0), targetOffset = vec(0, 0, 1), teleportOffset = vec(-0.5, -2, 0.5), dir = 3
+      rot = vec(0, 90, 0), pos = vec(1, 2, 0), targetRot = vec(0, -90, 0), targetOffset = vec(0, 0, 1), teleportOffset = vec(-0.5, -2, 0.5), dir = 3, updateRot = true
    },
    south = {
-      rot = vec(0, 180, 0), pos = vec(0, 2, 0), targetRot = vec(0, 0, 0), targetOffset = vec(1, 0, 0), teleportOffset = vec(0.5, -2, 0.5), dir = 2
+      rot = vec(0, 180, 0), pos = vec(0, 2, 0), targetRot = vec(0, 0, 0), targetOffset = vec(1, 0, 0), teleportOffset = vec(0.5, -2, 0.5), dir = 2, updateRot = true
    },
    up = {
       rot = vec(90, 0, 0), pos = vec(1, 0, 2), targetRot = vec(-90, 180, 0), targetOffset = vec(-1, 0, 0), teleportOffset = vec(-0.5, 0, -1), dir = 0
@@ -213,7 +213,7 @@ local function setPortal(portalType)
       return
    end
 
-   local block, pos, side = player:getTargetedBlock()
+   local block, pos, side = player:getTargetedBlock(true)
    if block:isAir() then
       return
    end
@@ -332,7 +332,9 @@ function events.tick()
          local endPortalSide = sides[touchingPortal2 and portal1side or portal2side]
          local pos = endPortal.pos + endPortalSide.teleportOffset
          local rot = player:getRot()
-         rot.y = rot.y - startPortalSide.dir * 90 + endPortalSide.dir * 90 + 180
+         if startPortalSide.updateRot or endPortalSide.updateRot then
+            rot.y = rot.y - startPortalSide.dir * 90 + endPortalSide.dir * 90 + 180
+         end
          local vel = previousVelocity * matrices.rotation3(startPortal.rot):transpose() * matrices.rotation3(0, 180, 0) * matrices.rotation3(endPortal.rot)
          teleportPlayer(pos, rot, vel)
       end
