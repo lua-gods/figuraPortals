@@ -2,7 +2,7 @@
 local worldRenderer = require("renderer")
 
 -- config
-local blockDist = vectors.vec2(3,3)
+local blockDist = vectors.vec2(5,3)
 local renderOnlyWhenCameraMoving = true
 
 -- variables
@@ -112,11 +112,10 @@ function lib.getScreens()
 end
 
 -- render
-local function defaultclampFunc(pos, size)
-   return vec(
-      math.clamp(pos.x, 0, size.x * 16),
-      math.clamp(pos.y, 0, size.y * 16)
-   )
+local function defaultclampFunc(pos, size) -- somehow this is faster than figura clamp
+   pos.x = pos.x > size.x * 16 and size.x * 16 or pos.x < 0 and 0 or pos.x
+   pos.y = pos.y > size.y * 16 and size.y * 16 or pos.y < 0 and 0 or pos.y
+   return pos
 end
 
 local function depthMatrix(offset, depth, size)
@@ -206,22 +205,22 @@ local function renderScreen(camera, screen)
          local visible = false
          for _, data in ipairs(spriteGroup) do
             local pos, vertex = data[1], data[2]
-            visible = visible or pos.z >= 0
             local depth = math.max(pos.z, 0)
             local mat = depthMatrixCache[depth]
             if not mat then
                mat = depthMatrix(offset, depth, size)
                depthMatrixCache[depth] = mat
             end
-            if mat.c3.x+8 > 0 and size.x * 16 > mat.c3.x - 8 and mat.c3.y+8 > 0 and size.y * 16 > mat.c3.y - 8 then
-               local newPos = pos.xy:augmented(1) * mat
-               local renderOffset = pos.z * 0.0025 - depthoffset
-               newPos = clampFunc(newPos.xy, size)
-               vertex:setPos(newPos.x, newPos.y, renderOffset)
+            local newPos = pos.xy:augmented(1) * mat
+            if newPos.x > -32 and size.x * 16 > newPos.x - 32 and newPos.y > -32 and size.y * 16 > newPos.y - 32 then
+               visible = visible or pos.z >= 0
             else
                visible = false
                break
             end
+            local renderOffset = pos.z * 0.0025 - depthoffset
+            newPos = clampFunc(newPos.xy, size)
+            vertex:setPos(newPos.x, newPos.y, renderOffset)
          end
          spriteGroup.sprite:setVisible(visible)
       end

@@ -19,11 +19,13 @@ local modelpart = models:newPart("portalGunPortals", "World")
 local frontPortalSprites = {}
 modelpart:newPart("portal1")
 table.insert(frontPortalSprites, modelpart.portal1:newSprite("front"):texture(pixelTexture, 16, 32):pos(0, 0, -0.1):renderType("end_gateway"))
-table.insert(frontPortalSprites, modelpart.portal1:newSprite("middle"):texture(pixelTexture, 16, 32):pos(0, 0, -0.05):color(0, 0, 0))
+table.insert(frontPortalSprites, modelpart.portal1:newSprite("front2"):texture(pixelTexture, 16, 32):pos(0, 0, -0.05):color(0, 0, 0):renderType("translucent_cull"))
+modelpart.portal1:newSprite("back2"):texture(pixelTexture, 16, 32):rot(0, 180, 0):pos(-16, 0, -0.05):color(0, 0, 0):renderType("translucent_cull")
 modelpart.portal1:newSprite("back"):texture(pixelTexture, 16, 32):rot(0, 180, 0):pos(-16, 0, -0.1):renderType("end_gateway")
 modelpart:newPart("portal2")
 table.insert(frontPortalSprites, modelpart.portal2:newSprite("front"):texture(pixelTexture, 16, 32):pos(0, 0, -0.1):renderType("end_gateway"))
-table.insert(frontPortalSprites, modelpart.portal2:newSprite("middle"):texture(pixelTexture, 16, 32):pos(0, 0, -0.05):color(0, 0, 0))
+table.insert(frontPortalSprites, modelpart.portal2:newSprite("front2"):texture(pixelTexture, 16, 32):pos(0, 0, -0.05):color(0, 0, 0):renderType("translucent_cull"))
+modelpart.portal2:newSprite("back2"):texture(pixelTexture, 16, 32):rot(0, 180, 0):pos(-16, 0, -0.05):color(0, 0, 0):renderType("translucent_cull")
 modelpart.portal2:newSprite("back"):texture(pixelTexture, 16, 32):rot(0, 180, 0):pos(-16, 0, -0.1):renderType("end_gateway")
 
 local linesList = {}
@@ -243,8 +245,8 @@ local function setPortal(portalType)
       local portalPos2 = p - secondPortal.size.xy:augmented() * rotMat
       local portalMin = vec(math.min(p.x, portalPos2.x), math.min(p.y, portalPos2.y), math.min(p.z, portalPos2.z))
       local portalMax = vec(math.max(p.x, portalPos2.x), math.max(p.y, portalPos2.y), math.max(p.z, portalPos2.z))
-      if world.getBlockState(p + vec(-0.5, -0.5, -0.5) * rotMat):isAir() and
-         world.getBlockState(p + vec(-0.5, -1.5, -0.5) * rotMat):isAir() and
+      if #world.getBlockState(p + vec(-0.5, -0.5, -0.5) * rotMat):getCollisionShape() == 0 and
+         #world.getBlockState(p + vec(-0.5, -1.5, -0.5) * rotMat):getCollisionShape() == 0 and
          world.getBlockState(p + vec(-0.5, -0.5, 0.5) * rotMat):isFullCube() and
          world.getBlockState(p + vec(-0.5, -1.5, 0.5) * rotMat):isFullCube() and
          not (portalMin < secondPortalMax and portalMax > secondPortalMin) then
