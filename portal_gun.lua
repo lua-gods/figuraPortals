@@ -160,8 +160,8 @@ end
 function events.world_tick()
    local color = skyColor.getColor()
 
-   portal1.backgroundColor = math.lerp(vec(0.1, 0.1, 0.1), color, math.min(world.getSkyLightLevel(portal2.pos - vec(0.5, 0.5, 0.5) * matrices.rotation3(portal2.rot)) / 8, 1))
-   portal2.backgroundColor = math.lerp(vec(0.1, 0.1, 0.1), color, math.min(world.getSkyLightLevel(portal1.pos - vec(0.5, 0.5, 0.5) * matrices.rotation3(portal1.rot)) / 8, 1))
+   portal1.backgroundColor = math.lerp(vec(0.1, 0.1, 0.1), color, math.min(world.getSkyLightLevel(portal2.pos - vec(0.5, 0.5, 0.5) * matrices.rotation3(portal2.rot)) / 4, 1))
+   portal2.backgroundColor = math.lerp(vec(0.1, 0.1, 0.1), color, math.min(world.getSkyLightLevel(portal1.pos - vec(0.5, 0.5, 0.5) * matrices.rotation3(portal1.rot)) / 4, 1))
 
    time = time + 1
    if time % 100 == 0 then

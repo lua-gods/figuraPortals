@@ -18,9 +18,9 @@ local sideMapShade = {
    SOUTH = 0.75,
    NORTH = 0.75,
    UP = 1,
-   DOWN = 0.25,
-   EAST = 0.5,
-   WEST = 0.5,
+   DOWN = 0.5,
+   EAST = 0.75,
+   WEST = 0.75,
 }
 
 local adjacent = {
