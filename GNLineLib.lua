@@ -134,9 +134,8 @@ function Line:delete()
    return self
 end
 
-local lineID = 0
 function draw:newLine()
-   lineID = lineID + 1
+   local lineID = #draw.elements.Line + 1
    ---@type Line
    local compound = {
       Dir=nil,
@@ -153,8 +152,8 @@ function draw:newLine()
       Transform = matrices.mat4(),
       Task = config.model_path:newSprite(config.texture_task_name_prefix .. "line" .. lineID):setTexture(config.white_texture):setRenderType("EMISSIVE_SOLID")}
    setmetatable(compound,Line)
-   compound.Task:color(compound.Color)
-   table.insert(draw.elements.Line,compound)
+   draw.elements.Line[lineID] = compound
+   compound:updateTransform()
    return compound
 end
 
@@ -166,18 +165,15 @@ local function flatvec(vector, normal)
    return flattenedVector
 end
 
-local llinec = 0
 events.WORLD_RENDER:register(function (delta)
    cpos = client:getCameraPos()
-   local linec = #draw.elements.Line
-   if cpos ~= lcpos or llinec ~= linec then
+   if cpos ~= lcpos then
       lcpos = cpos
-      llinec = linec
-      for id, line in pairs(draw.elements.Line) do
+      for _, line in pairs(draw.elements.Line) do
          line:updateTransform()
       end
    end
-   for key, e in pairs(draw.queue_update) do
+   for _, e in pairs(draw.queue_update) do
       if type(e) == "Line" then
          if e.Visible and e.Dir then
             local a = vectors.worldToScreenSpace(e.From)
@@ -201,6 +197,7 @@ events.WORLD_RENDER:register(function (delta)
          end
       end
    end
+   host:setActionbar(#draw.queue_update)
    draw.queue_update = {}
 end)
 draw.config = config
