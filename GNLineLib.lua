@@ -197,7 +197,6 @@ events.WORLD_RENDER:register(function (delta)
          end
       end
    end
-   host:setActionbar(#draw.queue_update)
    draw.queue_update = {}
 end)
 draw.config = config

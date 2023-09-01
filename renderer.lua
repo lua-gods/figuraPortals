@@ -112,10 +112,6 @@ local function newSprite(data, list, side, pos, offset, size, uvStart, uvEnd, ro
       -- add to modelparts
       table.insert(modelData, sprite)
    end
-
-   if data.block.id == "minecraft:water" then
-      --print("YEP")
-   end
 end
 
 local function newCube(data, list, min, max)
