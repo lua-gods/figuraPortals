@@ -71,6 +71,10 @@ return {
          }
       },
 
+      ["minecraft:lily_pad"] = {
+         color = vec(0.13, 0.5, 0.19)
+      },
+
       ["minecraft:water"] = {
          color = water,
          textures = {
