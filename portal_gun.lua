@@ -174,17 +174,41 @@ if not host:isHost() then
    return
 end
 
-local teleportModes = {
-   [0] = "none",
-   "command (requires op)",
-   "extura (requires extura)",
-   "extura with velocity (requires extura)",
-}
+local currentTeleportMode = 1
+do
+   local page = action_wheel:newPage("portalSettings")
+   action_wheel:setPage(page)
 
-local currentTeleportMode = 0
+   page:newAction():hoverColor(0, 0, 0)
+   page:newAction():title("toggle placing portals"):item("spyglass"):onToggle(function(x) enabled = x end)
+   page:newAction():title("clear portals"):item("structure_void"):onLeftClick(function() portal1enabled, portal2enabled = false, false pingPortals() end)
+   page:newAction():hoverColor(0, 0, 0)
+
+   local modeActions
+   local function updateModeActions()
+      for v, i in pairs(modeActions) do
+         v:setColor(currentTeleportMode == i and vec(1, 1, 1) or vec(0, 0, 0))
+         v:setHoverColor(currentTeleportMode == i and vec(1, 1, 1) or vec(0.5, 0.5, 0.5))
+      end
+   end
+
+   local function setMode(action)
+      currentTeleportMode = modeActions[action]
+      updateModeActions()
+   end
+
+   modeActions = {
+      [page:newAction():onLeftClick(setMode):title("teleport mode:\nnone"):item("barrier")] = 1,
+      [page:newAction():onLeftClick(setMode):title("teleport mode:\ncommand\n(requires op)"):item("command_block")] = 2,
+      [page:newAction():onLeftClick(setMode):title("teleport mode:\nextura\n(requires extura)"):item("ender_eye")] = 3,
+      [page:newAction():onLeftClick(setMode):title("teleport mode:\nextura + velocity\n(requires extura)"):item("blaze_powder")] = 4,
+   }
+
+   updateModeActions()
+end
 
 local function teleportPlayer(pos, rot, vel)
-   if currentTeleportMode == 1 then
+   if currentTeleportMode == 2 then
       local command = {
          "tp @s ",
          math.round(pos.x * 1000) / 1000, " ",
@@ -195,14 +219,14 @@ local function teleportPlayer(pos, rot, vel)
       }
 
       host:sendChatCommand(table.concat(command))
-   elseif currentTeleportMode == 2 or currentTeleportMode == 3 then
+   elseif currentTeleportMode == 3 or currentTeleportMode == 4 then
       if host.setPos then
          host:setPos(pos)
       end
       if host.setRot then
          host:setRot(rot)
       end
-      if currentTeleportMode == 3 and host.setVelocity then
+      if currentTeleportMode == 4 and host.setVelocity then
          host:setVelocity(vel)
       end
    end
@@ -235,11 +259,11 @@ local function setPortal(portalType)
 
    local secondPortalPos1 = secondPortal.pos
    local secondPortalPos2 = secondPortal.pos - secondPortal.size.xy:augmented() * matrices.rotation3(secondPortal.rot)
-   
+
    -- min1 < max2 and max1 > min2
    local secondPortalMin = vec(math.min(secondPortalPos1.x, secondPortalPos2.x), math.min(secondPortalPos1.y, secondPortalPos2.y), math.min(secondPortalPos1.z, secondPortalPos2.z))
    local secondPortalMax = vec(math.max(secondPortalPos1.x, secondPortalPos2.x), math.max(secondPortalPos1.y, secondPortalPos2.y), math.max(secondPortalPos1.z, secondPortalPos2.z))
-   
+
    for _, offset in pairs(placeOffsets) do
       local p = pos + rotMat * offset
       local portalPos2 = p - secondPortal.size.xy:augmented() * rotMat
@@ -256,42 +280,15 @@ local function setPortal(portalType)
    end
 end
 
-local portalGunPressTime = 0
-local portalGunKey = keybinds:newKeybind("portal gun", "key.keyboard.grave.accent")
-portalGunKey.press = function()
-   portalGunPressTime = time
-end
-portalGunKey.release = function()
-   if time > portalGunPressTime + 10 then
-      return
-   end
-   enabled = not enabled
-   if enabled then
-      host:setActionbar("portal gun enabled")
-   else
-      host:setActionbar("portal gun disabled")
-   end
-end
-
 keybinds:fromVanilla("key.attack").press = function()
-   if portalGunKey:isPressed() then
-      portalGunPressTime = -10
-      currentTeleportMode = (currentTeleportMode - 1) % (#teleportModes + 1)
-      print("teleport mode:\n"..teleportModes[currentTeleportMode])
-      return true
-   elseif enabled then
-      setPortal(1)
+   if enabled and not action_wheel:isEnabled() then
+      setPortal(2)
       return true
    end
 end
 keybinds:fromVanilla("key.use").press = function()
-   if portalGunKey:isPressed() then
-      portalGunPressTime = -10
-      currentTeleportMode = (currentTeleportMode + 1) % (#teleportModes + 1)
-      print("teleport mode:\n"..teleportModes[currentTeleportMode])
-      return true
-   elseif enabled then
-      setPortal(2)
+   if enabled and not action_wheel:isEnabled() then
+      setPortal(1)
       return true
    end
 end
