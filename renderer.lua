@@ -19,8 +19,8 @@ local sideMapShade = {
    NORTH = 0.75,
    UP = 1,
    DOWN = 0.5,
-   EAST = 0.75,
-   WEST = 0.75,
+   EAST = 0.65,
+   WEST = 0.65,
 }
 
 local adjacent = {
@@ -152,13 +152,11 @@ local function render(pos, dist, renderSprites)
       for y = -dist.y - 1, dist.y + 1 do
          list[x][y] = {}
          for z = -dist.x - 1, dist.x + 1 do
+            -- block info
             local offset = vec(x, y, z)
             local p = pos + offset
             local block = world.getBlockState(p)
-            local cull
-            if renderConfig.cull and block:isFullCube() then
-               cull = block:isOpaque() and 1 or 0
-            end
+            -- get override
             local override = overrideList.ids[block.id]
             if not override then
                for _, tag in pairs(block:getTags()) do
@@ -167,7 +165,18 @@ local function render(pos, dist, renderSprites)
                      break
                   end
                end
+               override = override or emptyOverride
             end
+            -- cull
+            local cull
+            if renderConfig.cull then
+               if override.cull then
+                  cull = override.cull
+               elseif block:isFullCube() then
+                  cull = block:isOpaque() and 1 or 0
+               end
+            end
+            -- cover check
             local covered = false
             for key, value in pairs(adjacent) do
                if not world.getBlockState(p+value):isOpaque() then
@@ -178,6 +187,7 @@ local function render(pos, dist, renderSprites)
             if not covered then
                list[x][y][z] = {}
             else
+               -- add to list
                list[x][y][z] = {
                   pos = p,
                   offset = offset,
@@ -185,7 +195,7 @@ local function render(pos, dist, renderSprites)
                   textures = block:getTextures(),
                   shape = block:getOutlineShape(),
                   cull = cull,
-                  override = override or emptyOverride
+                  override = override
                }
             end
          end
@@ -195,7 +205,7 @@ local function render(pos, dist, renderSprites)
    for x = -dist.x, dist.x -1 do
       for y = -dist.y, dist.y-1 do
          for z = -dist.x, dist.x-1 do
-            if list[x][y][z].block and not list[x][y][z].block:isAir() then
+            if list[x][y][z].block then
                renderBlock(list, list[x][y][z])
             end
          end

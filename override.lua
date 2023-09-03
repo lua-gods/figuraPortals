@@ -77,13 +77,19 @@ return {
 
       ["minecraft:water"] = {
          color = water,
+         cull = 2,
          textures = {
-            TOP = {[1] = "minecraft:textures/block/water_still"}
+            UP = {[1] = "minecraft:textures/block/water_still"}
          },
          mesh = {{
             pos = vec(1, 14 / 16, 1),
             rot = vec(90, 0, 0),
-            size = vec(1, 1), uvStart = vec(0, 0), uvEnd = vec(1, 1 / waterFrames), side = "TOP"
+            size = vec(1, 1), uvStart = vec(0, 0), uvEnd = vec(1, 1 / waterFrames), side = "UP"
+         },
+         {
+            pos = vec(1, 14 / 16, 0),
+            rot = vec(-90, 0, 0),
+            size = vec(1, 1), uvStart = vec(0, 0), uvEnd = vec(1, 1 / waterFrames), side = "UP"
          }}
       }
    },

@@ -2,8 +2,8 @@
 local worldRenderer = require("renderer")
 
 -- config
-local blockDist = vectors.vec2(3,3)
--- local renderOnlyWhenCameraMoving = true
+local blockDist = vectors.vec2(3, 3)
+local renderOnlyWhenCameraMoving = true
 
 -- variables
 local worldModelPart = models:newPart("screenWorld", "World")
