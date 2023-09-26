@@ -296,7 +296,7 @@ end
 local allowTeleport = false
 local previousVelocity = vec(0, 0, 0)
 function events.tick()
-   if currentTeleportMode == 0 or not portal1enabled or not portal2enabled then
+   if currentTeleportMode == 1 or not portal1enabled or not portal2enabled then
       previousVelocity = vec(0, 0, 0)
       return
    end
