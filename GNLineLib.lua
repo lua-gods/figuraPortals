@@ -150,7 +150,7 @@ function draw:newLine()
       Visible = true,
       Delete = true,
       Transform = matrices.mat4(),
-      Task = config.model_path:newSprite(config.texture_task_name_prefix .. "line" .. lineID):setTexture(config.white_texture):setRenderType("EMISSIVE_SOLID")}
+      Task = config.model_path:newSprite(config.texture_task_name_prefix .. "line" .. lineID):setTexture(config.white_texture, 1, 1):setRenderType("EMISSIVE_SOLID")}
    setmetatable(compound,Line)
    draw.elements.Line[lineID] = compound
    compound:updateTransform()
